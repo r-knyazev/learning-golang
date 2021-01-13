@@ -10,7 +10,7 @@ type repository struct {}
 type Product struct {
 	gorm.Model
 	CategoryID	uint	`json:"category_id"`
-	Articul		string	`json:"articul"`
+	SKU			string	`gorm:"type:varchar(64);unique;not null"`
 	Name		string	`json:"name"`
 }
 
@@ -29,4 +29,11 @@ func (r *repository) GetById(id uint) *Product {
 	}
 
 	return product
+}
+
+//сохранить товар
+func (r *repository) Save(product *Product) (*Product, error) {
+	error := connection.Connection.GetDB().Save(product).Error
+
+	return product, error
 }
