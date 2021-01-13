@@ -12,7 +12,7 @@ func init() {
 
 	Router.PUT("/api/v1/product/", productController.Controller.UpdateProduct)
 	Router.GET("/api/v1/product/", productController.Controller.GetList)
-	Router.POST("/api/v1/product/", productController.Controller.UpdateProduct)
+	Router.POST("/api/v1/product/", productController.Controller.CreateProduct)
 	Router.DELETE("/api/v1/product/", productController.Controller.DeleteProduct)
 
 	/*router.PUT("/api/v1/category/", controllers.CreateCategory)
