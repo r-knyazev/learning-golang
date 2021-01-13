@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"log"
+	"os"
 )
 
 func (c *connection) InitDB() {
+	host 		:= os.Getenv("PG_HOST")
+	user		:= os.Getenv("PG_USER")
+	database	:= os.Getenv("PG_DATABASE")
+	password 	:= os.Getenv("PG_PASSWORD")
 
-	//TODO вынести в конфиг
-	host := "localhost"
-	userName := "postgres"
-	DBName := "products"
-	password := "root"
-
-	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", host, userName, DBName, password)
+	dbUri := fmt.Sprintf(os.Getenv("DB_URI_FORMAT"), host, user, database, password)
 
 	conn, err := gorm.Open("postgres", dbUri)
 	if err != nil {
-		fmt.Print(err)
+		log.Fatal(err)
 	}
 
 	//TODO сделать миграцию

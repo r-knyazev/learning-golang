@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/valyala/fasthttp"
+	"log"
+	_ "new/src/config"
 	"new/src/router"
+	"os"
 )
 
 func main() {
-	//TODO вынести порт в конфиг
-	fasthttp.ListenAndServe(":8080", router.Router.Handler)
+	log.Fatal(fasthttp.ListenAndServe(":" + os.Getenv("SERVER_PORT"), router.Router.Handler))
 }
