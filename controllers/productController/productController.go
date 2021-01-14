@@ -57,11 +57,9 @@ func (c *controller) CreateProduct(ctx *fasthttp.RequestCtx) {
 			createdProduct, err := productRepository.Repository.Save(product)
 			if err == nil {
 				response["created"] = createdProduct
-				response["err"] = err
 				code = 201
 			} else {
-				//TODO сформировать другой ответ в случае ошибки
-				response["error"] = err
+				response["error"] = "error while creating product"
 			}
 		} else {
 			response["error"] = validateErrors
@@ -92,6 +90,7 @@ func (c *controller) DeleteProduct(ctx *fasthttp.RequestCtx) {
 // проверяет: 1) Наличие category_id (обязательный параметр)
 //            2) Существование категории TODO реализовать
 //            3) Наличие артикула
+//			  4) Уникальность артикула
 // в случае успеха, возвращает nil
 func (c *controller) validate(product productRepository.Product) map[string]interface{} {
 	errors := make(map[string]interface{})
@@ -106,7 +105,10 @@ func (c *controller) validate(product productRepository.Product) map[string]inte
 		errors["sku"] = "sku required"
 	}
 
-	//TODO сделать проверку на уникальность артикула
+	products := productRepository.Repository.FindBy(map[string]interface{}{"sku": product.SKU})
+	if len(products) > 1 || (len(products) == 1 && products[0].ID != product.ID) {
+		errors["sku"] = "not unique"
+	}
 
 	if len(errors) == 0 {
 		return nil

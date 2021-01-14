@@ -22,13 +22,27 @@ func newProductRepository() ProductRepositoryInterface {
 //если товар не найден, вернет nil
 func (r *repository) GetById(id uint) *Product {
 	product := &Product{}
-	err := connection.Connection.GetDB().Table("products").Where("id = ?", id).First(product).Error
+	err := connection.Connection.GetDB().Table("products").First(product, id).Error
 
 	if err != nil {
 		return nil
 	}
 
 	return product
+}
+
+//поиск товаров по переданным параметрам, где:
+//ключ массива = стобец
+//значение = значение для выборки
+func (r *repository) FindBy(criteria map[string]interface{}) []Product {
+	var products []Product
+
+	err := connection.Connection.GetDB().Table("products").Where(criteria).Find(&products).Error
+	if err != nil {
+		return nil
+	}
+
+	return products
 }
 
 //сохранить товар
