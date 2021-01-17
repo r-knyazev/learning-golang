@@ -2,6 +2,6 @@ package productRepository
 
 type ProductRepositoryInterface interface {
 	GetById(id uint) *Product
-	FindBy(map[string]interface{}) []Product
+	FindBy(conditions FindByConditions) []Product
 	Save(product *Product) (*Product, error)
 }

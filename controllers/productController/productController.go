@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/valyala/fasthttp"
 	"new/src/repository/productRepository"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -16,24 +18,68 @@ func newProductController() ProductControllerInterface {
 	return &controller{}
 }
 
-//получение товара
+//получение товара если передан id, иначе список товаров
 func (c *controller) GetList(ctx *fasthttp.RequestCtx) {
 	var code int
 	response := make(map[string]interface{})
 
-	id, err := ctx.QueryArgs().GetUint("id")
-	if err == nil && id > 0 {
+	id, _ := ctx.QueryArgs().GetUint("id")
+	if id > 0 {
 		product := productRepository.Repository.GetById(uint(id))
 		if product != nil {
 			response["product"] = product
 			code = 200
 		} else {
-			response["error"] = "product not found"
 			code = 404
+			response["error"] = "product not found"
 		}
 	} else {
-		response["error"] = "error in incoming parameters"
-		code = 500
+		limit, _ := ctx.QueryArgs().GetUint("limit")
+		if limit < 0 {
+			limit, _ = strconv.Atoi(os.Getenv("DEFAULT_LIMIT"))
+		}
+
+		offset, _ := ctx.QueryArgs().GetUint("offset")
+		if offset < 0 {
+			offset = 0
+		}
+
+		var sort string
+		if ctx.QueryArgs().Has("sort") {
+			sort = string(ctx.QueryArgs().Peek("sort"))
+		} else {
+			sort = os.Getenv("DEFAULT_SORT")
+		}
+
+		var order string
+		if ctx.QueryArgs().Has("order") {
+			order = string(ctx.QueryArgs().Peek("order"))
+		} else {
+			order = os.Getenv("DEFAULT_ORDER")
+		}
+
+		wheres := make(map[string]interface{})
+
+		categoryId, _ := ctx.QueryArgs().GetUint("category_id")
+		if categoryId > 0 {
+			wheres["category_id"] = categoryId
+		}
+
+		products := productRepository.Repository.FindBy(productRepository.FindByConditions{
+			Where	: wheres,
+			Sort	: sort,
+			Order	: order,
+			Limit	: uint(limit),
+			Offset	: uint(offset)})
+
+		if len(products) > 0 {
+			code = 200
+			response["products"] = products
+		} else {
+			code = 404
+			response["error"] = "products not found"
+		}
+		response["products"] = products
 	}
 
 	ctx.Response.Header.Add("Content-Type", "application/json")
@@ -105,7 +151,13 @@ func (c *controller) validate(product productRepository.Product) map[string]inte
 		errors["sku"] = "sku required"
 	}
 
-	products := productRepository.Repository.FindBy(map[string]interface{}{"sku": product.SKU})
+	limit, _ := strconv.Atoi(os.Getenv("DEFAULT_LIMIT"))
+	products := productRepository.Repository.FindBy(productRepository.FindByConditions{
+		Where	: map[string]interface{}{"sku" : product.SKU},
+		Limit	: uint(limit),
+		Sort	: os.Getenv("DEFAULT_SORT"),
+		Order	: os.Getenv("DEFAULT_ORDER")})
+
 	if len(products) > 1 || (len(products) == 1 && products[0].ID != product.ID) {
 		errors["sku"] = "not unique"
 	}

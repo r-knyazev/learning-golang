@@ -14,6 +14,14 @@ type Product struct {
 	Name		string	`json:"name"`
 }
 
+type FindByConditions struct {
+	 Where map[string]interface{}
+	 Limit uint
+	 Offset uint
+	 Sort string
+	 Order string
+}
+
 func newProductRepository() ProductRepositoryInterface {
 	return &repository{}
 }
@@ -31,13 +39,11 @@ func (r *repository) GetById(id uint) *Product {
 	return product
 }
 
-//поиск товаров по переданным параметрам, где:
-//ключ массива = стобец
-//значение = значение для выборки
-func (r *repository) FindBy(criteria map[string]interface{}) []Product {
+//поиск товаров
+func (r *repository) FindBy(cond FindByConditions) []Product {
 	var products []Product
 
-	err := connection.Connection.GetDB().Table("products").Where(criteria).Find(&products).Error
+	err := connection.Connection.GetDB().Table("products").Where(cond.Where).Order(cond.Sort + " " + cond.Order).Limit(cond.Limit).Offset(cond.Offset).Find(&products).Error
 	if err != nil {
 		return nil
 	}
