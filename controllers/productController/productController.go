@@ -4,88 +4,53 @@ import (
 	"encoding/json"
 	"github.com/valyala/fasthttp"
 	"new/src/repository/productRepository"
+	"new/src/services/productService"
+	"new/src/services/requestService"
 	"os"
 	"strconv"
 	"strings"
 )
 
 type controller struct {
-
+	requestService requestService.RequestServiceInterface
+	productService productService.ProductServiceInterface
 }
 
 
 func newProductController() ProductControllerInterface {
-	return &controller{}
+	return &controller{
+		requestService : requestService.RequestService,
+		productService : productService.ProductService}
 }
 
 //получение товара если передан id, иначе список товаров
 func (c *controller) GetList(ctx *fasthttp.RequestCtx) {
-	var code int
-	response := make(map[string]interface{})
+	requestParams := c.requestService.GetRequestParams(ctx)
+	ctx.Response.Header.Add("Content-Type", "application/json")
 
-	id, _ := ctx.QueryArgs().GetUint("id")
-	if id > 0 {
-		product := productRepository.Repository.GetById(uint(id))
-		if product != nil {
-			response["product"] = product
-			code = 200
-		} else {
-			code = 404
-			response["error"] = "product not found"
-		}
-	} else {
-		limit, _ := ctx.QueryArgs().GetUint("limit")
-		if limit < 0 {
-			limit, _ = strconv.Atoi(os.Getenv("DEFAULT_LIMIT"))
+	if requestParams.ID > 0 {
+		if product := c.productService.GetProduct(requestParams.ID); product != nil {
+			ctx.Response.SetStatusCode(200)
+			json.NewEncoder(ctx).Encode(product)
+
+			return
 		}
 
-		offset, _ := ctx.QueryArgs().GetUint("offset")
-		if offset < 0 {
-			offset = 0
-		}
+		ctx.Response.SetStatusCode(404)
+		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : "product not found"})
 
-		var sort string
-		if ctx.QueryArgs().Has("sort") {
-			sort = string(ctx.QueryArgs().Peek("sort"))
-		} else {
-			sort = os.Getenv("DEFAULT_SORT")
-		}
-
-		var order string
-		if ctx.QueryArgs().Has("order") {
-			order = string(ctx.QueryArgs().Peek("order"))
-		} else {
-			order = os.Getenv("DEFAULT_ORDER")
-		}
-
-		wheres := make(map[string]interface{})
-
-		categoryId, _ := ctx.QueryArgs().GetUint("category_id")
-		if categoryId > 0 {
-			wheres["category_id"] = categoryId
-		}
-
-		products := productRepository.Repository.FindBy(productRepository.FindByConditions{
-			Where	: wheres,
-			Sort	: sort,
-			Order	: order,
-			Limit	: uint(limit),
-			Offset	: uint(offset)})
-
-		if len(products) > 0 {
-			code = 200
-			response["products"] = products
-		} else {
-			code = 404
-			response["error"] = "products not found"
-		}
-		response["products"] = products
+		return
 	}
 
-	ctx.Response.Header.Add("Content-Type", "application/json")
-	ctx.Response.SetStatusCode(code)
+	if products := c.productService.GetProducts(requestParams); len(products) > 0 {
+		ctx.Response.SetStatusCode(200)
+		json.NewEncoder(ctx).Encode(products)
 
-	json.NewEncoder(ctx).Encode(response)
+		return
+	}
+
+	ctx.Response.SetStatusCode(404)
+	json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : "products not found"})
 }
 
 //создание товара

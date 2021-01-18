@@ -5,7 +5,9 @@ import (
 	"new/src/connection"
 )
 
-type repository struct {}
+type repository struct {
+	db *gorm.DB
+}
 
 type Product struct {
 	gorm.Model
@@ -23,14 +25,15 @@ type FindByConditions struct {
 }
 
 func newProductRepository() ProductRepositoryInterface {
-	return &repository{}
+	return &repository{
+		db : connection.Connection.GetDB()}
 }
 
 //получение товара по id
 //если товар не найден, вернет nil
 func (r *repository) GetById(id uint) *Product {
 	product := &Product{}
-	err := connection.Connection.GetDB().Table("products").First(product, id).Error
+	err := r.db.Table("products").First(product, id).Error
 
 	if err != nil {
 		return nil
@@ -43,7 +46,7 @@ func (r *repository) GetById(id uint) *Product {
 func (r *repository) FindBy(cond FindByConditions) []Product {
 	var products []Product
 
-	err := connection.Connection.GetDB().Table("products").Where(cond.Where).Order(cond.Sort + " " + cond.Order).Limit(cond.Limit).Offset(cond.Offset).Find(&products).Error
+	err := r.db.Table("products").Where(cond.Where).Order(cond.Sort + " " + cond.Order).Limit(cond.Limit).Offset(cond.Offset).Find(&products).Error
 	if err != nil {
 		return nil
 	}
@@ -53,7 +56,7 @@ func (r *repository) FindBy(cond FindByConditions) []Product {
 
 //сохранить товар
 func (r *repository) Save(product *Product) (*Product, error) {
-	error := connection.Connection.GetDB().Save(product).Error
+	error := r.db.Save(product).Error
 
 	return product, error
 }
