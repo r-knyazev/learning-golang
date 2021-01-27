@@ -1,8 +1,8 @@
 package productService
 
 import (
-	"new/src/repository/productRepository"
-	"new/src/services/requestService"
+	"learning/repository/productRepository"
+	"learning/services/requestService"
 )
 
 type ProductServiceInterface interface {

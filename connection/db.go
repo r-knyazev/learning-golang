@@ -21,8 +21,6 @@ func (c *connection) InitDB() {
 		log.Fatal(err)
 	}
 
-	//TODO сделать миграцию
-
 	c.DB = conn
 }
 

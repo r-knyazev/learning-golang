@@ -1,6 +1,6 @@
 package productRepository
 
-import "new/src/connection"
+import "learning/connection"
 
 var Repository ProductRepositoryInterface
 

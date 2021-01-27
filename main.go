@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/valyala/fasthttp"
+	_ "learning/config"
+	"learning/router"
 	"log"
-	_ "new/src/config"
-	"new/src/router"
 	"os"
 )
 

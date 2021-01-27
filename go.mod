@@ -1,4 +1,4 @@
-module new/src
+module learning
 
 go 1.15
 

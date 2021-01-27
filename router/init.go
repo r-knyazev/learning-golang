@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/fasthttp/router"
-	"new/src/controllers/productController"
+	"learning/controllers/productController"
 )
 
 var Router *router.Router

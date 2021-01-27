@@ -2,7 +2,7 @@ package productRepository
 
 import (
 	"github.com/jinzhu/gorm"
-	"new/src/connection"
+	"learning/connection"
 )
 
 type repository struct {

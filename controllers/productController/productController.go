@@ -3,9 +3,9 @@ package productController
 import (
 	"encoding/json"
 	"github.com/valyala/fasthttp"
-	"new/src/repository/productRepository"
-	"new/src/services/productService"
-	"new/src/services/requestService"
+	"learning/repository/productRepository"
+	"learning/services/productService"
+	"learning/services/requestService"
 	"os"
 	"strconv"
 	"strings"
