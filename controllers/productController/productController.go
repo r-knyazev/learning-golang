@@ -3,12 +3,8 @@ package productController
 import (
 	"encoding/json"
 	"github.com/valyala/fasthttp"
-	"learning/repository/productRepository"
 	"learning/services/productService"
 	"learning/services/requestService"
-	"os"
-	"strconv"
-	"strings"
 )
 
 type controller struct {
@@ -55,38 +51,20 @@ func (c *controller) GetList(ctx *fasthttp.RequestCtx) {
 
 //создание товара
 func (c *controller) CreateProduct(ctx *fasthttp.RequestCtx) {
-	var code int
-	product := &productRepository.Product{}
-	response := make(map[string]interface{})
+	ctx.Response.Header.Add("Content-Type", "application/json")
 
-	r := strings.NewReader(string(ctx.Request.Body()))
-	err := json.NewDecoder(r).Decode(product)
+	requestParams := c.requestService.GetRequestParams(ctx)
+	product, err := c.productService.CreateProduct(requestParams)
 
-	if err == nil {
-		validateErrors := c.validate(*product)
-		if validateErrors == nil {
-			createdProduct, err := productRepository.Repository.Save(product)
-			if err == nil {
-				response["created"] = createdProduct
-				code = 201
-			} else {
-				response["error"] = "error while creating product"
-			}
-		} else {
-			response["error"] = validateErrors
-			code = 500
-		}
-	} else {
-		response["error"] = "error while decoding request body"
-		response["detail"] = err
-		response["msg"] = err.Error()
-		code = 500
+	if err != nil {
+		ctx.Response.SetStatusCode(500)
+		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : err.Error()})
+
+		return
 	}
 
-	ctx.Response.Header.Add("Content-Type", "application/json")
-	ctx.Response.SetStatusCode(code)
-
-	json.NewEncoder(ctx).Encode(response)
+	ctx.Response.SetStatusCode(201)
+	json.NewEncoder(ctx).Encode(product)
 }
 
 func (c *controller) UpdateProduct(ctx *fasthttp.RequestCtx) {
@@ -95,41 +73,4 @@ func (c *controller) UpdateProduct(ctx *fasthttp.RequestCtx) {
 
 func (c *controller) DeleteProduct(ctx *fasthttp.RequestCtx) {
 
-}
-
-// валидатор товаров
-// проверяет: 1) Наличие category_id (обязательный параметр)
-//            2) Существование категории TODO реализовать
-//            3) Наличие артикула
-//			  4) Уникальность артикула
-// в случае успеха, возвращает nil
-func (c *controller) validate(product productRepository.Product) map[string]interface{} {
-	errors := make(map[string]interface{})
-
-	if product.CategoryID == 0 {
-		errors["category_id"] = "category_id required"
-	}
-
-	//TODO сделать проверку на существование категории
-
-	if product.SKU == "" {
-		errors["sku"] = "sku required"
-	}
-
-	limit, _ := strconv.Atoi(os.Getenv("DEFAULT_LIMIT"))
-	products := productRepository.Repository.FindBy(productRepository.FindByConditions{
-		Where	: map[string]interface{}{"sku" : product.SKU},
-		Limit	: uint(limit),
-		Sort	: os.Getenv("DEFAULT_SORT"),
-		Order	: os.Getenv("DEFAULT_ORDER")})
-
-	if len(products) > 1 || (len(products) == 1 && products[0].ID != product.ID) {
-		errors["sku"] = "not unique"
-	}
-
-	if len(errors) == 0 {
-		return nil
-	} else {
-		return errors
-	}
 }

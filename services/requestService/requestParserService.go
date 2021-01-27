@@ -12,6 +12,8 @@ type RequestParams struct {
 	Order		string
 	Limit		uint
 	Offset		uint
+	SKU			string
+	Name		string
 }
 
 //сбор всех доступных парамертов
@@ -23,6 +25,8 @@ func (s *requestService) GetRequestParams(ctx *fasthttp.RequestCtx) *RequestPara
 	order 			:= ctx.QueryArgs().Peek("order")
 	limit, _		:= ctx.QueryArgs().GetUint("limit")
 	offset, _		:= ctx.QueryArgs().GetUint("offset")
+	sku 			:= ctx.QueryArgs().Peek("sku")
+	name 			:= ctx.QueryArgs().Peek("name")
 
 	return &RequestParams{
 		ID 			: s.intToUintOrZero(id),
@@ -31,7 +35,9 @@ func (s *requestService) GetRequestParams(ctx *fasthttp.RequestCtx) *RequestPara
 		Sort		: string(sort),
 		Order		: string(order),
 		Limit		: s.intToUintOrZero(limit),
-		Offset		: s.intToUintOrZero(offset)}
+		Offset		: s.intToUintOrZero(offset),
+		SKU			: string(sku),
+		Name 		: string(name)}
 }
 
 //конвертирует int в uint
