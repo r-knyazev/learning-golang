@@ -24,7 +24,7 @@ func (p processorValidateSKU) IsValid(params *requestService.RequestParams) bool
 		Sort	: os.Getenv("DEFAULT_PRODUCT_SORT"),
 		Order	: os.Getenv("DEFAULT_PRODUCT_ORDER")})
 
-	if len(products) != 0 {
+	if len(products) > 1 || (len(products) == 1 && products[0].ID != params.ID) {
 		skuError = "sku not unique"
 
 		return false
