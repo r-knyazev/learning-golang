@@ -92,6 +92,22 @@ func (c *controller) UpdateProduct(ctx *fasthttp.RequestCtx) {
 	json.NewEncoder(ctx).Encode(product)
 }
 
+//удаление товара
 func (c *controller) DeleteProduct(ctx *fasthttp.RequestCtx) {
+	requestParams := c.requestService.GetRequestParams(ctx)
+	ctx.Response.Header.Add("Content-Type", "application/json")
+
+	product := c.productService.GetProduct(requestParams.ID)
+	if product == nil {
+		ctx.Response.SetStatusCode(404)
+		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : "product not found"})
+
+		return
+	}
+
+	c.productService.DeleteProduct(product)
+
+	ctx.Response.SetStatusCode(200)
+	json.NewEncoder(ctx).Encode(product)
 
 }

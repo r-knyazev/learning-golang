@@ -60,3 +60,8 @@ func (r *repository) Save(product *Product) (*Product, error) {
 
 	return product, error
 }
+
+//удалить товар
+func (r *repository) Delete(product *Product) {
+	r.db.Delete(product)
+}
