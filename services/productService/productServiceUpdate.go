@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-//сервис обновления товара товара
+//сервис обновления товара
 func (s *productService) UpdateProduct(params *requestService.RequestParams, product *productRepository.Product) error {
 
 	for _, proc := range s.processorsValidate {

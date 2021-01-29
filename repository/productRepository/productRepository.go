@@ -13,7 +13,7 @@ type Product struct {
 	gorm.Model
 	CategoryID	uint	`json:"category_id"`
 	SKU			string	`gorm:"type:varchar(64);unique;not null"`
-	Name		string	`json:"name"`
+	Name		string	`gorm:"type:varchar(128);not null"`
 }
 
 type FindByConditions struct {
@@ -63,5 +63,5 @@ func (r *repository) Save(product *Product) (*Product, error) {
 
 //удалить товар
 func (r *repository) Delete(product *Product) {
-	r.db.Delete(product)
+	r.db.Unscoped().Delete(product)
 }
