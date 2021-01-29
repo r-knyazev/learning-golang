@@ -21,6 +21,7 @@ func newProductService() *productService  {
 
 	processorsValid := []processorsProductValidators.ProcessorProductValidateInterface{
 		processorsProductValidators.ProcessorValidateCategoryId,
+		processorsProductValidators.ProcessorValidateCategoryExist,
 		processorsProductValidators.ProcessorValidateSKURequired,
 		processorsProductValidators.ProcessorValidateSKUUnique,
 		processorsProductValidators.ProcessorValidateName}
