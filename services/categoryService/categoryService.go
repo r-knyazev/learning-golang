@@ -16,10 +16,12 @@ func newCategoryService() *categoryService  {
 		processorsCategoryConditions.ProcessorCondSort,
 		processorsCategoryConditions.ProcessorCondOrder,
 		processorsCategoryConditions.ProcessorCondLimit,
-		processorsCategoryConditions.ProcessorCondOffset}
+		processorsCategoryConditions.ProcessorCondOffset,
+	}
 
 	processorsValid := []processorsCategoryValidators.ProcessorCategoryValidateInterface{
-		processorsCategoryValidators.ProcessorValidateName}
+		processorsCategoryValidators.ProcessorValidateName,
+	}
 
 	return &categoryService{processorsCond, processorsValid}
 }

@@ -17,14 +17,16 @@ func newProductService() *productService  {
 		processorsProductConditions.ProcessorCondSort,
 		processorsProductConditions.ProcessorCondOrder,
 		processorsProductConditions.ProcessorCondLimit,
-		processorsProductConditions.ProcessorCondOffset}
+		processorsProductConditions.ProcessorCondOffset,
+	}
 
 	processorsValid := []processorsProductValidators.ProcessorProductValidateInterface{
 		processorsProductValidators.ProcessorValidateCategoryId,
 		processorsProductValidators.ProcessorValidateCategoryExist,
 		processorsProductValidators.ProcessorValidateSKURequired,
 		processorsProductValidators.ProcessorValidateSKUUnique,
-		processorsProductValidators.ProcessorValidateName}
+		processorsProductValidators.ProcessorValidateName,
+	}
 
 	return &productService{processorsCond, processorsValid}
 }
