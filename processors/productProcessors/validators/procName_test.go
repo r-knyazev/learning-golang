@@ -32,15 +32,6 @@ func Test_processorValidateName_IsValid(t *testing.T) {
 			},
 			want: false,
 		},
-		{
-			name: "Тестирование с кириллицей",
-			args: args{
-				params: &requestService.RequestParams{
-					Name: "Тестирование",
-				},
-			},
-			want: true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

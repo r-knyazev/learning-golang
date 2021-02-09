@@ -32,16 +32,6 @@ func Test_processorValidateCategoryId_IsValid(t *testing.T) {
 			},
 			want: true,
 		},
-		{
-			name: "Тестирование с 2",
-			args: args{
-				params: &requestService.RequestParams{
-					CategoryID: 2,
-				},
-			},
-			want: true,
-		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
