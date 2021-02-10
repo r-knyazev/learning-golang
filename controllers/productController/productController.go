@@ -3,6 +3,7 @@ package productController
 import (
 	"encoding/json"
 	"github.com/valyala/fasthttp"
+	"learning/repository/productRepository"
 	"learning/services/productService"
 	"learning/services/requestService"
 )
@@ -54,11 +55,21 @@ func (c *controller) CreateProduct(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.Add("Content-Type", "application/json")
 
 	requestParams := c.requestService.GetRequestParams(ctx)
+	requestParams.ID = 0
+
 	product, err := c.productService.CreateProduct(requestParams)
 
 	if err != nil {
 		ctx.Response.SetStatusCode(500)
 		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : err.Error()})
+
+		return
+	}
+
+	product, err = productRepository.Repository.Save(product)
+	if err != nil {
+		ctx.Response.SetStatusCode(500)
+		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : "error while save product"})
 
 		return
 	}
