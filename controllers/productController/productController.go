@@ -57,16 +57,16 @@ func (c *controller) CreateProduct(ctx *fasthttp.RequestCtx) {
 	requestParams := c.requestService.GetRequestParams(ctx)
 	requestParams.ID = 0
 
-	product, err := c.productService.CreateProduct(requestParams)
+	product, errors := c.productService.CreateProduct(requestParams)
 
-	if err != nil {
+	if errors != nil {
 		ctx.Response.SetStatusCode(500)
-		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : err.Error()})
+		json.NewEncoder(ctx).Encode(map[string]interface{}{"errors" : errors})
 
 		return
 	}
 
-	product, err = productRepository.Repository.Save(product)
+	product, err := productRepository.Repository.Save(product)
 	if err != nil {
 		ctx.Response.SetStatusCode(500)
 		json.NewEncoder(ctx).Encode(map[string]interface{}{"error" : "error while save product"})
