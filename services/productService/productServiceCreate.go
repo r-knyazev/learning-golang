@@ -14,8 +14,6 @@ func (s *productService) CreateProduct(params *requestService.RequestParams) (*p
 
 	var wg sync.WaitGroup
 
-	defer close(itemsChan)
-
 	wg.Add(2)
 	for i := 1; i < 3; i++ {
 		go func(i int) {
@@ -29,13 +27,12 @@ func (s *productService) CreateProduct(params *requestService.RequestParams) (*p
 	}
 
 	wg.Wait()
+	close(itemsChan)
 
-	countErrors := len(itemsChan)
-	errors := make([]string, countErrors)
+	errors := make([]string, 0, 0)
 
-	for i := 0; i < countErrors; i++ {
-		e := <- itemsChan
-		errors[i] = e.Error()
+	for e := range itemsChan {
+		errors = append(errors, e.Error())
 	}
 
 	if len(errors) > 0 {
